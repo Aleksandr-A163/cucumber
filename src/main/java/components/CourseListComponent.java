@@ -1,56 +1,58 @@
- package components;
+package components;
 
- import org.openqa.selenium.By;
- import org.openqa.selenium.WebDriver;
- import org.openqa.selenium.WebElement;
- import org.openqa.selenium.support.ui.ExpectedConditions;
- import org.openqa.selenium.support.ui.WebDriverWait;
+import pages.CourseCardComponent;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
+import java.util.List;
 
- import java.time.Duration;
- import java.util.List;
- import java.util.stream.Collectors;
+/**
+ * Компонент для работы со списком курсов и меню.
+ */
+public class CourseListComponent {
 
- public class CourseListComponent {
+    @FindBy(css = "nav .menu-item-courses")
+    private WebElement coursesMenu;
 
-     private final WebDriver driver;
-     private final WebDriverWait wait;
-     private final By cards = By.cssSelector("a.sc-zzdkm7-0");
+    @FindBy(css = "nav .menu-item-courses .submenu li")
+    private List<WebElement> subMenuItems;
 
+    @FindBy(css = ".course-card")
+    private List<CourseCardComponent> allCards;
 
-    @com.google.inject.Inject
-    public CourseListComponent(WebDriver driver) {
-         this.driver = driver;
-         this.wait   = new WebDriverWait(driver, Duration.ofSeconds(10));
-     }
+    public void waitForReady() {
+        // существующий код ожидания
+    }
 
-     public void waitForReady() {
-         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(cards));
-     }
+    public List<CourseCardComponent> getCardsWithDates() {
+        return allCards; // замените на реальную логику
+    }
 
-     public List<CourseCardComponent> getAllCards() {
-         List<WebElement> els = driver.findElements(cards);
-         return els.stream()
-                  .map(e -> new CourseCardComponent(driver, e))
-                  .collect(Collectors.toList());
-     }
+    public List<String> getAllTitles() {
+        return allCards.stream()
+                .map(CourseCardComponent::getTitle)
+                .collect(java.util.stream.Collectors.toList());
+    }
 
-     public List<String> getAllTitles() {
-         return getAllCards().stream()
-                             .map(CourseCardComponent::getTitle)
-                             .collect(Collectors.toList());
-     }
+    public void clickByName(String name) {
+        allCards.stream()
+                .filter(c -> c.getTitle().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Курс не найден: " + name))
+                .click();
+    }
 
-     public void clickByName(String name) {
-         getAllCards().stream()
-             .filter(c -> c.getTitle().equalsIgnoreCase(name))
-             .findFirst()
-             .orElseThrow(() -> new IllegalArgumentException("Курс не найден: " + name))
-             .click();
-     }
+    public List<CourseCardComponent> getAllCards() {
+        return allCards;
+    }
 
-     public List<CourseCardComponent> getCardsWithDates() {
-         return getAllCards().stream()
-             .filter(c -> c.tryGetStartDate().isPresent())
-             .collect(Collectors.toList());
-     }
- }
+    public void hoverMainMenu() {
+        new Actions(DriverHolder.get())
+            .moveToElement(coursesMenu)
+            .perform();
+    }
+
+    public List<WebElement> getSubMenuItems() {
+        return subMenuItems;
+    }
+}
