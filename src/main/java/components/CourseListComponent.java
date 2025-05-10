@@ -1,15 +1,23 @@
 package components;
 
-import pages.CourseCardComponent;
+import com.google.inject.Inject;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Компонент для работы со списком курсов и меню.
  */
 public class CourseListComponent {
+
+    @Inject
+    private WebDriver driver;
 
     @FindBy(css = "nav .menu-item-courses")
     private WebElement coursesMenu;
@@ -20,20 +28,38 @@ public class CourseListComponent {
     @FindBy(css = ".course-card")
     private List<CourseCardComponent> allCards;
 
+    /**
+     * Ждёт, пока все карточки курсов станут видимыми.
+     */
     public void waitForReady() {
-        // существующий код ожидания
+        List<WebElement> roots = allCards.stream()
+            .map(CourseCardComponent::getRootElement)
+            .collect(Collectors.toList());
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfAllElements(roots));
     }
 
+    /**
+     * Возвращает список карточек с датой старта, если она указана.
+     */
     public List<CourseCardComponent> getCardsWithDates() {
-        return allCards; // замените на реальную логику
+        return allCards.stream()
+                .filter(c -> c.tryGetStartDate().isPresent())
+                .collect(Collectors.toList());
     }
 
+    /**
+     * Возвращает все заголовки курсов.
+     */
     public List<String> getAllTitles() {
         return allCards.stream()
                 .map(CourseCardComponent::getTitle)
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
+    /**
+     * Кликает по курсу с указанным названием.
+     */
     public void clickByName(String name) {
         allCards.stream()
                 .filter(c -> c.getTitle().equalsIgnoreCase(name))
@@ -42,16 +68,25 @@ public class CourseListComponent {
                 .click();
     }
 
+    /**
+     * Возвращает все объекты CourseCardComponent.
+     */
     public List<CourseCardComponent> getAllCards() {
         return allCards;
     }
 
+    /**
+     * Наводит курсор на пункт меню "Курсы".
+     */
     public void hoverMainMenu() {
-        new Actions(DriverHolder.get())
+        new Actions(driver)
             .moveToElement(coursesMenu)
             .perform();
     }
 
+    /**
+     * Возвращает элементы подменю пункта "Курсы".
+     */
     public List<WebElement> getSubMenuItems() {
         return subMenuItems;
     }

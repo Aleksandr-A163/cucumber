@@ -11,6 +11,9 @@ import java.util.Optional;
  */
 public class CourseCardComponent {
 
+    @FindBy(css = ".course-card")
+    private WebElement rootElement;
+
     @FindBy(css = ".course-card__title")
     private WebElement titleElement;
 
@@ -23,25 +26,40 @@ public class CourseCardComponent {
     @FindBy(css = ".course-card__category")
     private WebElement categoryElement;
 
+    /** Корневой элемент карточки */
+    public WebElement getRootElement() {
+        return rootElement;
+    }
+
+    /** Заголовок курса */
     public String getTitle() {
         return titleElement.getText().trim();
     }
 
+    /** Цена курса */
     public BigDecimal getPrice() {
-        String raw = priceElement.getText().replaceAll("[^0-9,\\.]","")
-                             .replace(",", ".");
+        String raw = priceElement.getText()
+            .replaceAll("[^0-9,\\.]", "")
+            .replace(",", ".");
         return new BigDecimal(raw);
     }
 
+    /** Дата старта, если есть */
     public Optional<LocalDate> tryGetStartDate() {
-        return Optional.of(LocalDate.parse(dateElement.getText().trim()));
+        try {
+            return Optional.of(LocalDate.parse(dateElement.getText().trim()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
+    /** Проверка категории */
     public boolean isInCategory(String category) {
         return categoryElement.getText().trim().equalsIgnoreCase(category);
     }
 
+    /** Клик на карточку */
     public void click() {
-        titleElement.click();
+        rootElement.click();
     }
 }
