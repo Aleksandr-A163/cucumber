@@ -4,7 +4,6 @@ plugins {
     id 'com.github.spotbugs' version '5.0.13'
 }
 
-
 repositories {
     mavenCentral()
 }
@@ -15,48 +14,24 @@ java {
     }
 }
 
-
 dependencies {
     // Selenium
     implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
-
     // WebDriverManager
     implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
-
-    // JUnit
-    implementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-
-    // Google Guice
+    // DI
     implementation 'com.google.inject:guice:7.0.0'
-
-    // Jsoup
+    // HTML parsing
     implementation 'org.jsoup:jsoup:1.17.2'
 
-    // Логирование (опционально)
-    implementation 'org.slf4j:slf4j-api:2.0.12'
-    runtimeOnly 'org.slf4j:slf4j-simple:2.0.12'
+    // JUnit 5 (для ассертов и запуска тестов)
+    implementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    // Cucumber
+    testImplementation 'io.cucumber:cucumber-java:7.22.1'
+    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.22.1'
+    testImplementation 'io.cucumber:cucumber-picocontainer:7.22.1'
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
- test {
-   useJUnitPlatform()
-
-     testLogging {
-         events "passed", "skipped", "failed"
-     }
- }
-
-checkstyle {
-    configFile = file("linters/checkstyle.xml")
-    toolVersion = "10.12.3"
-}
-
-spotbugs {
-    toolVersion = "4.8.3"
-    effort = 'max'
-    reportLevel = 'low'
-    excludeFilter = file("linters/spotbugs-exclude.xml")
+test {
+    useJUnitPlatform()
 }
