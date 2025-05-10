@@ -40,13 +40,20 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
- test {
-   useJUnitPlatform()
+test {
+    useJUnitPlatform {
+        // 1) Запускать только Cucumber-движок
+        includeEngines 'cucumber'
+        // 2) (Опционально) Если у вас всё ещё есть JUnit5 степы в сценариях,
+        //    но лежат в другом пакете, можно их тоже включить по тегам или пакетам:
+        //    includeTags 'bdd'
+    }
+    // Полностью исключить все тесты из папки scenarios:
+    exclude '**/scenarios/**'
 
-     testLogging {
-         events "passed", "skipped", "failed"
-     }
- }
+    // Чтобы gradle-тесты выводили в консоли русский текст (UTF-8)
+    jvmArgs '-Dfile.encoding=UTF-8'
+}
 
 checkstyle {
     configFile = file("linters/checkstyle.xml")
