@@ -6,6 +6,7 @@ import components.CourseListComponent;
 import components.CourseCardComponent;
 import org.openqa.selenium.WebDriver;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +25,8 @@ public class CourseCatalogPage {
 
     @Inject
     public CourseCatalogPage(WebDriver driver,
-                              CookieBannerComponent cookieBanner,
-                              CourseListComponent courseList) {
+                             CookieBannerComponent cookieBanner,
+                             CourseListComponent courseList) {
         this.driver = driver;
         this.cookieBanner = cookieBanner;
         this.courseList = courseList;
@@ -87,5 +88,35 @@ public class CourseCatalogPage {
     /** Ждёт, пока карточки станут доступны в DOM */
     public void waitForCoursesToBeVisible() {
         courseList.waitForReady();
+    }
+
+    // ---------------- Новые методы BDD ----------------
+
+    /**
+     * Открывает в меню "Курсы" подраздел с именем sectionName.
+     */
+    public void openSection(String sectionName) {
+        // Наводим на главный пункт меню "Курсы"
+        courseList.hoverMainMenu("Курсы");
+        // Выбираем и кликаем нужный пункт
+        courseList.getSubMenuItems().stream()
+            .filter(item -> item.getText().trim().equalsIgnoreCase(sectionName))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Секция не найдена: " + sectionName))
+            .click();
+    }
+
+    /**
+     * Возвращает информацию по подготовительным курсам (название + цена).
+     */
+    public List<CourseInfo> getPreparatoryCourseInfos() {
+        return courseList.getAllCards().stream()
+            .filter(card -> card.isInCategory("Подготовительные курсы"))
+            .map(card -> new CourseInfo(
+                card.getTitle(),
+                card.getPrice()  // BigDecimal или нужный тип цены
+            ))
+            .collect(Collectors.toList());
     }
 }
