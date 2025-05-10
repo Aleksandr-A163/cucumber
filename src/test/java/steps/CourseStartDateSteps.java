@@ -1,6 +1,7 @@
 package steps;
 
 import com.google.inject.Injector;
+import di.InjectorFactory;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 import pages.CourseCatalogPage;

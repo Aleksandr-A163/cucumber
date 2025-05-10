@@ -1,6 +1,7 @@
 package steps;
 
 import com.google.inject.Injector;
+import di.InjectorFactory;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
@@ -21,7 +22,6 @@ public class CourseSearchSteps {
 
     @Before
     public void initPages() {
-        // Инициализируем через Guice один раз перед каждым сценарием
         injector     = InjectorFactory.getInjector();
         catalogPage  = injector.getInstance(CourseCatalogPage.class);
         coursePage   = injector.getInstance(CoursePage.class);
@@ -35,15 +35,11 @@ public class CourseSearchSteps {
     @When("Я выбираю случайный курс из списка:")
     public void pickRandomCourse(DataTable table) {
         List<String> desired = table.asList();
-        // Получаем все названия курсов с текущей страницы
         List<String> all = catalogPage.getAllCourseTitles();
-        // Оставляем только те, что заданы в фиче
         List<String> filtered = all.stream()
                                    .filter(desired::contains)
                                    .collect(Collectors.toList());
-        // Выбираем случайный
         selectedCourse = filtered.get(new Random().nextInt(filtered.size()));
-        // Кликаем по нему
         catalogPage.clickOnCourseByName(selectedCourse);
     }
 
