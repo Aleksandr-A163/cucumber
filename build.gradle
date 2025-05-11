@@ -17,42 +17,32 @@ java {
 dependencies {
     // Selenium
     implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
-    
     // WebDriverManager
     implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
-    
     // DI
     implementation 'com.google.inject:guice:7.0.0'
-    
     // HTML parsing
     implementation 'org.jsoup:jsoup:1.17.2'
-    
+
     // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-    
+
     // Cucumber BDD
     testImplementation 'io.cucumber:cucumber-java:7.22.1'
     testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.22.1'
     testImplementation 'io.cucumber:cucumber-picocontainer:7.22.1'
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
 
-test {
+tasks.withType(Test).configureEach {
     useJUnitPlatform {
-        // 1) Запускать только Cucumber-движок
+        // Запускать только Cucumber-движок
         includeEngines 'cucumber'
-        // 2) (Опционально) Если у вас всё ещё есть JUnit5 степы в сценариях,
-        //    но лежат в другом пакете, можно их тоже включить по тегам или пакетам:
-        //    includeTags 'bdd'
     }
-    // Полностью исключить все тесты из папки scenarios:
-    exclude '**/scenarios/**'
 
-    // Чтобы gradle-тесты выводили в консоли русский текст (UTF-8)
+    // Принудительно устанавливаем кодировку UTF-8 в JVM и тестовой платформе
     jvmArgs '-Dfile.encoding=UTF-8'
+    systemProperty 'file.encoding', 'UTF-8'
 }
 
 checkstyle {
