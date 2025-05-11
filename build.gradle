@@ -15,19 +15,12 @@ java {
 }
 
 dependencies {
-    // Selenium
     implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
-    // WebDriverManager
     implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
-    // Guice DI
     implementation 'com.google.inject:guice:7.0.0'
-    // HTML parsing
     implementation 'org.jsoup:jsoup:1.17.2'
 
-    // JUnit 5 (для Platform Engine, но не используем JUnit-тесты)
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-
-    // Cucumber BDD
     testImplementation 'io.cucumber:cucumber-java:7.22.1'
     testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.22.1'
     testImplementation 'io.cucumber:cucumber-picocontainer:7.22.1'
@@ -37,20 +30,26 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-test {
-    useJUnitPlatform {
-        includeEngines 'cucumber'
-    }
-    // Исключаем старые JUnit-тесты (если нужно)
-    exclude '**/scenarios/**'
-
-    // Передаём browser из фичи
-    systemProperty 'browser', project.hasProperty('browser') ? project.property('browser') : 'chrome'
-
-    // UTF-8 для вывода
-    jvmArgs '-Dfile.encoding=UTF-8'
-    systemProperty 'file.encoding', 'UTF-8'
+// Отключаем стандартный тест-таск
+tasks.named('test').configure {
+    enabled = false
 }
+
+// Явная таска для запуска только Cucumber–BDD
+ task cucumber(type: Test) {
+     group = 'verification'
+     description = 'Запустить только Cucumber BDD сценарии'
+     useJUnitPlatform {
+         includeEngines 'cucumber'
+     }
+     systemProperty 'browser', project.findProperty('browser') ?: 'chrome'
+     jvmArgs '-Dfile.encoding=UTF-8'
+     systemProperty 'file.encoding', 'UTF-8'
+     testClassesDirs = sourceSets.test.output.classesDirs
+     classpath = sourceSets.test.runtimeClasspath
+ }
+
+check.dependsOn cucumber
 
 checkstyle {
     configFile = file("linters/checkstyle.xml")

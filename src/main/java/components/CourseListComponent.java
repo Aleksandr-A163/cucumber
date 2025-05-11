@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
@@ -16,8 +17,7 @@ import java.util.stream.Collectors;
  */
 public class CourseListComponent {
 
-    @Inject
-    private WebDriver driver;
+    private final WebDriver driver;
 
     @FindBy(css = "nav .menu-item-courses")
     private WebElement coursesMenu;
@@ -27,6 +27,15 @@ public class CourseListComponent {
 
     @FindBy(css = ".course-card")
     private List<CourseCardComponent> allCards;
+
+    /**
+     * Конструктор с инъекцией WebDriver и инициализацией @FindBy полей.
+     */
+    @Inject
+    public CourseListComponent(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
 
     /**
      * Ждёт, пока все карточки курсов станут видимыми.
@@ -44,8 +53,8 @@ public class CourseListComponent {
      */
     public List<CourseCardComponent> getCardsWithDates() {
         return allCards.stream()
-                .filter(c -> c.tryGetStartDate().isPresent())
-                .collect(Collectors.toList());
+            .filter(c -> c.tryGetStartDate().isPresent())
+            .collect(Collectors.toList());
     }
 
     /**
@@ -53,8 +62,8 @@ public class CourseListComponent {
      */
     public List<String> getAllTitles() {
         return allCards.stream()
-                .map(CourseCardComponent::getTitle)
-                .collect(Collectors.toList());
+            .map(CourseCardComponent::getTitle)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -62,10 +71,10 @@ public class CourseListComponent {
      */
     public void clickByName(String name) {
         allCards.stream()
-                .filter(c -> c.getTitle().equalsIgnoreCase(name))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Курс не найден: " + name))
-                .click();
+            .filter(c -> c.getTitle().equalsIgnoreCase(name))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Курс не найден: " + name))
+            .click();
     }
 
     /**

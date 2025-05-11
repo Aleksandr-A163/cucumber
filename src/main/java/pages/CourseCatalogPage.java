@@ -5,8 +5,8 @@ import components.CookieBannerComponent;
 import components.CourseListComponent;
 import components.CourseCardComponent;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.PageFactory;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +22,9 @@ public class CourseCatalogPage {
     private final CookieBannerComponent cookieBanner;
     private final CourseListComponent courseList;
 
+    /**
+     * Конструктор с инъекцией зависимостей и инициализацией полей через PageFactory.
+     */
     @Inject
     public CourseCatalogPage(WebDriver driver,
                              CookieBannerComponent cookieBanner,
@@ -29,14 +32,22 @@ public class CourseCatalogPage {
         this.driver = driver;
         this.cookieBanner = cookieBanner;
         this.courseList = courseList;
+        PageFactory.initElements(driver, this);
     }
 
-    public void open() {
+    /**
+     * Открывает страницу каталога, принимает баннер и ждёт готовности.
+     */
+    public CourseCatalogPage open() {
         driver.get(URL);
         cookieBanner.acceptIfPresent();
         courseList.waitForReady();
+        return this;
     }
 
+    /**
+     * Проверяет, что страница открыта.
+     */
     public boolean isOpened() {
         courseList.waitForReady();
         return !courseList.getAllCards().isEmpty();
@@ -54,31 +65,6 @@ public class CourseCatalogPage {
         return courseList.getCardsWithDates();
     }
 
-    public LocalDate getEarliestCourseDate() {
-        return getAllCourseCardsWithDates().stream()
-            .map(c -> c.tryGetStartDate().orElseThrow())
-            .min(LocalDate::compareTo)
-            .orElseThrow();
-    }
-
-    public LocalDate getLatestCourseDate() {
-        return getAllCourseCardsWithDates().stream()
-            .map(c -> c.tryGetStartDate().orElseThrow())
-            .max(LocalDate::compareTo)
-            .orElseThrow();
-    }
-
-    public List<String> getCourseTitlesByDate(LocalDate date) {
-        return getAllCourseCardsWithDates().stream()
-            .filter(c -> c.tryGetStartDate().orElseThrow().equals(date))
-            .map(CourseCardComponent::getTitle)
-            .distinct()
-            .collect(Collectors.toList());
-    }
-
-    public void waitForCoursesToBeVisible() {
-        courseList.waitForReady();
-    }
 
     // ---------------- Новые методы BDD ----------------
 
