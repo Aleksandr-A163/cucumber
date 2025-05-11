@@ -39,14 +39,12 @@ public class CourseStartDateSteps {
         Assertions.assertFalse(filteredCourses.isEmpty(),
             String.format("Нет курсов, стартующих с %s или позже", filterDate)
         );
-        // Дополнительно проверяем, что даты не раньше фильтра
         for (CourseInfo ci : filteredCourses) {
             Assertions.assertFalse(
                 ci.getStartDate().isBefore(filterDate),
                 String.format("Курс %s стартует раньше фильтра: %s",
                     ci.getName(), ci.getStartDate())
             );
-            // Вывод в консоль для наглядности
             System.out.printf("%s — %s%n", ci.getName(), ci.getStartDate());
         }
     }

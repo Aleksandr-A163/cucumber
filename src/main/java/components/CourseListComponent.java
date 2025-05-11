@@ -1,6 +1,7 @@
 package components;
 
 import com.google.inject.Inject;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -8,6 +9,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,41 +21,37 @@ public class CourseListComponent {
 
     private final WebDriver driver;
 
-    // старый @FindBy для сырых элементов
-    @FindBy(css = ".course-card")
-    private List<WebElement> cardRoots;
-
-    // Инициализированный список ваших фрагментов
-    private List<CourseCardComponent> allCards;
-
     @FindBy(css = "nav .menu-item-courses")
     private WebElement coursesMenu;
 
     @FindBy(css = "nav .menu-item-courses .submenu li")
     private List<WebElement> subMenuItems;
 
+    // Список компонентов курсов
+    private List<CourseCardComponent> allCards;
+
+    /**
+     * Конструктор: инициализируем стандартные элементы меню.
+     */
     @Inject
     public CourseListComponent(WebDriver driver) {
         this.driver = driver;
-        // Инициализируем cardRoots, coursesMenu, subMenuItems
         PageFactory.initElements(driver, this);
-        // А теперь оборачиваем каждый WebElement в ваш компонент
-        this.allCards = cardRoots.stream()
-            .map(root -> new CourseCardComponent(driver, root))
-            .collect(Collectors.toList());
     }
 
     /**
-     * Ждёт, пока все карточки курсов станут видимыми.
+     * Ждёт, пока хотя бы одна карточка курсов станет видимой, затем оборачивает все найденные
+     * элементы карточек в CourseCardComponent.
      */
     public void waitForReady() {
-        // берем корневые WebElement-ы из своих компонентов
-        List<WebElement> roots = allCards.stream()
-            .map(CourseCardComponent::getRootElement)
-            .collect(Collectors.toList());
+        List<WebElement> roots = new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                By.cssSelector(".course-card")
+            ));
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.visibilityOfAllElements(roots));
+        this.allCards = roots.stream()
+            .map(root -> new CourseCardComponent(driver, root))
+            .collect(Collectors.toList());
     }
 
     /**

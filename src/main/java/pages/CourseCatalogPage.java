@@ -22,9 +22,6 @@ public class CourseCatalogPage {
     private final CookieBannerComponent cookieBanner;
     private final CourseListComponent courseList;
 
-    /**
-     * Конструктор с инъекцией зависимостей и инициализацией полей через PageFactory.
-     */
     @Inject
     public CourseCatalogPage(WebDriver driver,
                              CookieBannerComponent cookieBanner,
@@ -35,9 +32,6 @@ public class CourseCatalogPage {
         PageFactory.initElements(driver, this);
     }
 
-    /**
-     * Открывает страницу каталога, принимает баннер и ждёт готовности.
-     */
     public CourseCatalogPage open() {
         driver.get(URL);
         cookieBanner.acceptIfPresent();
@@ -45,9 +39,6 @@ public class CourseCatalogPage {
         return this;
     }
 
-    /**
-     * Проверяет, что страница открыта.
-     */
     public boolean isOpened() {
         courseList.waitForReady();
         return !courseList.getAllCards().isEmpty();
@@ -65,8 +56,31 @@ public class CourseCatalogPage {
         return courseList.getCardsWithDates();
     }
 
+    public LocalDate getEarliestCourseDate() {
+        return getAllCourseCardsWithDates().stream()
+            .map(c -> c.tryGetStartDate().orElseThrow())
+            .min(LocalDate::compareTo)
+            .orElseThrow();
+    }
 
-    // ---------------- Новые методы BDD ----------------
+    public LocalDate getLatestCourseDate() {
+        return getAllCourseCardsWithDates().stream()
+            .map(c -> c.tryGetStartDate().orElseThrow())
+            .max(LocalDate::compareTo)
+            .orElseThrow();
+    }
+
+    public List<String> getCourseTitlesByDate(LocalDate date) {
+        return getAllCourseCardsWithDates().stream()
+            .filter(c -> c.tryGetStartDate().orElseThrow().equals(date))
+            .map(CourseCardComponent::getTitle)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+    public void waitForCoursesToBeVisible() {
+        courseList.waitForReady();
+    }
 
     public void openSection(String sectionName) {
         courseList.hoverMainMenu();
