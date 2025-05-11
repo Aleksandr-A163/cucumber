@@ -1,7 +1,11 @@
 package components;
 
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.pagefactory.DefaultElementLocatorFactory;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -11,8 +15,8 @@ import java.util.Optional;
  */
 public class CourseCardComponent {
 
-    @FindBy(css = ".course-card")
-    private WebElement rootElement;
+    private final WebDriver driver;
+    private final WebElement rootElement;
 
     @FindBy(css = ".course-card__title")
     private WebElement titleElement;
@@ -25,6 +29,20 @@ public class CourseCardComponent {
 
     @FindBy(css = ".course-card__category")
     private WebElement categoryElement;
+
+    /**
+     * Конструктор: сохраняет rootElement и инициализирует все @FindBy
+     * относительно этого корня.
+     */
+    public CourseCardComponent(WebDriver driver, WebElement rootElement) {
+        this.driver = driver;
+        this.rootElement = rootElement;
+        // инициализируем titleElement, priceElement, dateElement и categoryElement
+        PageFactory.initElements(
+            new DefaultElementLocatorFactory(rootElement),
+            this
+        );
+    }
 
     /** Корневой элемент карточки */
     public WebElement getRootElement() {
@@ -55,7 +73,8 @@ public class CourseCardComponent {
 
     /** Проверка категории */
     public boolean isInCategory(String category) {
-        return categoryElement.getText().trim().equalsIgnoreCase(category);
+        return categoryElement.getText().trim()
+                              .equalsIgnoreCase(category);
     }
 
     /** Клик на карточку */

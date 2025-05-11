@@ -19,31 +19,39 @@ public class CourseListComponent {
 
     private final WebDriver driver;
 
+    // старый @FindBy для сырых элементов
+    @FindBy(css = ".course-card")
+    private List<WebElement> cardRoots;
+
+    // Инициализированный список ваших фрагментов
+    private List<CourseCardComponent> allCards;
+
     @FindBy(css = "nav .menu-item-courses")
     private WebElement coursesMenu;
 
     @FindBy(css = "nav .menu-item-courses .submenu li")
     private List<WebElement> subMenuItems;
 
-    @FindBy(css = ".course-card")
-    private List<CourseCardComponent> allCards;
-
-    /**
-     * Конструктор с инъекцией WebDriver и инициализацией @FindBy полей.
-     */
     @Inject
     public CourseListComponent(WebDriver driver) {
         this.driver = driver;
+        // Инициализируем cardRoots, coursesMenu, subMenuItems
         PageFactory.initElements(driver, this);
+        // А теперь оборачиваем каждый WebElement в ваш компонент
+        this.allCards = cardRoots.stream()
+            .map(root -> new CourseCardComponent(driver, root))
+            .collect(Collectors.toList());
     }
 
     /**
      * Ждёт, пока все карточки курсов станут видимыми.
      */
     public void waitForReady() {
+        // берем корневые WebElement-ы из своих компонентов
         List<WebElement> roots = allCards.stream()
             .map(CourseCardComponent::getRootElement)
             .collect(Collectors.toList());
+
         new WebDriverWait(driver, Duration.ofSeconds(10))
             .until(ExpectedConditions.visibilityOfAllElements(roots));
     }
